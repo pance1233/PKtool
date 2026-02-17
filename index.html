@@ -1,0 +1,1458 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PKtool - Advanced Python Utility</title>
+
+<!-- Google Fonts -->
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@100;400;600;700;900&family=Fira+Code:wght@400;700&display=swap" rel="stylesheet">
+
+<style>
+    /* Reset */
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    html {
+        scroll-behavior: smooth;
+    }
+
+    body {
+        font-family: 'Inter', sans-serif;
+        color: #fff;
+        background: #0a0b0e;
+        overflow-x: hidden;
+    }
+
+    /* Custom scrollbar */
+    ::-webkit-scrollbar {
+        width: 12px;
+    }
+
+    ::-webkit-scrollbar-track {
+        background: rgba(0, 0, 0, 0.5);
+    }
+
+    ::-webkit-scrollbar-thumb {
+        background: linear-gradient(180deg, #00f7ff, #0066ff);
+        border-radius: 10px;
+        transition: all 0.3s ease;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+        background: linear-gradient(180deg, #00c8ff, #0066ff);
+        box-shadow: 0 0 20px rgba(0, 200, 255, 0.5);
+    }
+
+    /* ===== ANIMATED BACKGROUND ===== */
+    .animated-bg {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: 1;
+    }
+
+    canvas#matrixCanvas {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: 1;
+    }
+
+    canvas#particleCanvas {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: 2;
+    }
+
+    .gradient-overlay {
+        position: fixed;
+        width: 100%;
+        height: 100%;
+        background: radial-gradient(ellipse at 20% 50%, rgba(0, 200, 255, 0.15) 0%, transparent 50%),
+                    radial-gradient(ellipse at 80% 80%, rgba(100, 0, 255, 0.15) 0%, transparent 50%),
+                    linear-gradient(180deg, rgba(10, 11, 14, 0.8) 0%, rgba(10, 11, 14, 0.9) 100%);
+        z-index: 1;
+        pointer-events: none;
+    }
+
+    /* ===== CONTENT WRAPPER ===== */
+    .content-wrapper {
+        position: relative;
+        z-index: 10;
+    }
+
+    /* ===== HERO SECTION ===== */
+    .hero {
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 60px 20px;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .hero-content {
+        text-align: center;
+        max-width: 900px;
+        animation: slideUpFade 1s ease-out forwards;
+    }
+
+    .logo-badge {
+        display: inline-block;
+        padding: 8px 20px;
+        background: rgba(0, 200, 255, 0.1);
+        border: 1px solid rgba(0, 200, 255, 0.3);
+        border-radius: 50px;
+        font-size: 0.9rem;
+        font-weight: 600;
+        color: #00c8ff;
+        margin-bottom: 30px;
+        animation: fadeIn 0.8s ease-out forwards;
+        opacity: 0;
+        animation-delay: 0.2s;
+    }
+
+    h1 {
+        font-size: clamp(3rem, 8vw, 5.5rem);
+        font-weight: 900;
+        line-height: 1.1;
+        margin-bottom: 20px;
+        background: linear-gradient(135deg, #00f7ff 0%, #00c8ff 25%, #64bfff 75%, #00ffff 100%);
+        background-size: 300% 300%;
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        animation: slideUpFade 1s ease-out forwards, gradientShift 8s ease infinite;
+        opacity: 0;
+        animation-delay: 0.3s, 0.3s;
+        letter-spacing: -1px;
+        filter: drop-shadow(0 0 20px rgba(0, 200, 255, 0.3));
+        text-shadow: 0 0 30px rgba(0, 200, 255, 0.2);
+    }
+
+    .subtitle {
+        font-size: 1.3rem;
+        color: rgba(200, 220, 255, 0.85);
+        margin-bottom: 40px;
+        line-height: 1.6;
+        max-width: 700px;
+        margin-left: auto;
+        margin-right: auto;
+        font-weight: 300;
+        letter-spacing: 0.5px;
+        animation: slideUpFade 1s ease-out forwards;
+        opacity: 0;
+        animation-delay: 0.5s;
+    }
+
+    /* ===== CTA BUTTON ===== */
+    .cta-buttons {
+        display: flex;
+        gap: 20px;
+        justify-content: center;
+        flex-wrap: wrap;
+        margin-bottom: 60px;
+        animation: slideUpFade 1s ease-out forwards;
+        opacity: 0;
+        animation-delay: 0.7s;
+    }
+
+    .btn {
+        padding: 16px 40px;
+        font-size: 1.05rem;
+        font-weight: 600;
+        border: none;
+        border-radius: 12px;
+        cursor: pointer;
+        transition: all 0.3s cubic-bezier(0.17, 0.67, 0.83, 0.67);
+        text-decoration: none;
+        display: inline-block;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .btn::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: rgba(255, 255, 255, 0.3);
+        transition: left 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+        z-index: -1;
+    }
+
+    .btn::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: radial-gradient(circle at center, rgba(255,255,255,0.3), transparent 70%);
+        opacity: 0;
+        transition: opacity 0.4s ease;
+    }
+
+    .btn:hover::before {
+        left: 100%;
+    }
+
+    .btn:hover::after {
+        opacity: 1;
+    }
+
+    .btn:active {
+        transform: scale(0.98);
+    }
+
+    .btn-primary {
+        background: linear-gradient(135deg, #00f7ff 0%, #0066ff 100%);
+        color: #000;
+        box-shadow: 0 8px 32px rgba(0, 247, 255, 0.3), inset 0 1px 0 rgba(255,255,255,0.2);
+    }
+
+    .btn-primary:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 20px 60px rgba(0, 247, 255, 0.6), inset 0 1px 0 rgba(255,255,255,0.3);
+    }
+
+    .btn-secondary {
+        background: rgba(0, 200, 255, 0.1);
+        color: #00c8ff;
+        border: 2px solid rgba(0, 200, 255, 0.3);
+        backdrop-filter: blur(10px);
+    }
+
+    .btn-secondary:hover {
+        background: rgba(0, 200, 255, 0.2);
+        border-color: rgba(0, 247, 255, 0.6);
+        transform: translateY(-4px);
+        box-shadow: 0 12px 40px rgba(0, 200, 255, 0.3);
+        backdrop-filter: blur(20px);
+    }
+
+    /* ===== FEATURES SECTION ===== */
+    .features {
+        padding: 100px 20px;
+        background: linear-gradient(180deg, rgba(10, 11, 14, 0.5) 0%, rgba(15, 25, 50, 0.5) 100%);
+        border-top: 1px solid rgba(0, 200, 255, 0.1);
+    }
+
+    .section-header {
+        text-align: center;
+        margin-bottom: 80px;
+    }
+
+    .section-title {
+        font-size: clamp(2.5rem, 6vw, 3.5rem);
+        font-weight: 800;
+        margin-bottom: 15px;
+        color: #fff;
+    }
+
+    .section-subtitle {
+        font-size: 1.15rem;
+        color: rgba(200, 220, 255, 0.7);
+        max-width: 500px;
+        margin: 0 auto;
+    }
+
+    .features-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 30px;
+        max-width: 1200px;
+        margin: 0 auto;
+    }
+
+    .feature-card {
+        background: linear-gradient(135deg, rgba(0, 200, 255, 0.08) 0%, rgba(100, 0, 255, 0.08) 100%);
+        border: 1px solid rgba(0, 200, 255, 0.15);
+        border-radius: 20px;
+        padding: 40px 30px;
+        transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+        position: relative;
+        overflow: hidden;
+        animation: fadeInScale 0.6s ease-out forwards;
+        opacity: 0;
+        backdrop-filter: blur(10px);
+        min-height: 280px;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .feature-card:nth-child(1) { animation-delay: 0.4s; }
+    .feature-card:nth-child(2) { animation-delay: 0.5s; }
+    .feature-card:nth-child(3) { animation-delay: 0.6s; }
+    .feature-card:nth-child(4) { animation-delay: 0.7s; }
+    .feature-card:nth-child(5) { animation-delay: 0.8s; }
+    .feature-card:nth-child(6) { animation-delay: 0.9s; }
+
+    .feature-card::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -50%;
+        width: 200%;
+        height: 200%;
+        background: radial-gradient(circle, rgba(0, 247, 255, 0.3) 0%, transparent 70%);
+        opacity: 0;
+        transition: all 0.6s ease;
+        z-index: 1;
+    }
+
+    .feature-card::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(135deg, rgba(0, 247, 255, 0.1) 0%, rgba(100, 0, 255, 0.1) 100%);
+        opacity: 0;
+        transition: opacity 0.5s ease;
+        z-index: 0;
+        border-radius: 20px;
+    }
+
+    .feature-card:hover::before {
+        opacity: 1;
+        top: -10%;
+        right: -10%;
+    }
+
+    .feature-card:hover::after {
+        opacity: 1;
+    }
+
+    .feature-card:hover {
+        transform: translateY(-15px) scale(1.02);
+        border-color: rgba(0, 247, 255, 0.5);
+        box-shadow: 0 30px 80px rgba(0, 200, 255, 0.25), inset 0 1px 0 rgba(255,255,255,0.1);
+    }
+
+    .feature-icon {
+        width: 60px;
+        height: 60px;
+        background: linear-gradient(135deg, #00f7ff, #0066ff);
+        border-radius: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2rem;
+        margin-bottom: 20px;
+        position: relative;
+        z-index: 2;
+        box-shadow: 0 8px 24px rgba(0, 247, 255, 0.3);
+        transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    .feature-card:hover .feature-icon {
+        transform: scale(1.1) rotate(5deg);
+    }
+
+    .feature-title {
+        font-size: 1.4rem;
+        font-weight: 700;
+        margin-bottom: 12px;
+        color: #fff;
+        position: relative;
+        z-index: 2;
+        letter-spacing: -0.5px;
+    }
+
+    .feature-desc {
+        font-size: 1rem;
+        color: rgba(200, 220, 255, 0.8);
+        line-height: 1.7;
+        position: relative;
+        z-index: 2;
+        flex-grow: 1;
+    }
+
+    /* ===== SPECS SECTION ===== */
+    .specs {
+        padding: 100px 20px;
+        background: linear-gradient(180deg, rgba(15, 25, 50, 0.5) 0%, rgba(10, 11, 14, 0.5) 100%);
+        border-top: 1px solid rgba(0, 200, 255, 0.1);
+    }
+
+    .specs-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 30px;
+        max-width: 1000px;
+        margin: 0 auto;
+    }
+
+    .spec-item {
+        text-align: center;
+        animation: fadeInScale 0.6s ease-out forwards;
+        opacity: 0;
+    }
+
+    .spec-item:nth-child(1) { animation-delay: 0.3s; }
+    .spec-item:nth-child(2) { animation-delay: 0.4s; }
+    .spec-item:nth-child(3) { animation-delay: 0.5s; }
+    .spec-item:nth-child(4) { animation-delay: 0.6s; }
+
+    .spec-number {
+        font-size: clamp(2rem, 6vw, 3.5rem);
+        font-weight: 900;
+        background: linear-gradient(135deg, #00f7ff, #0066ff);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    .spec-label {
+        font-size: 1rem;
+        color: rgba(200, 220, 255, 0.8);
+        margin-top: 10px;
+        font-weight: 600;
+    }
+
+    /* ===== TESTIMONIALS SECTION ===== */
+    .testimonials {
+        padding: 100px 20px;
+        background: linear-gradient(180deg, rgba(10, 11, 14, 0.5) 0%, rgba(15, 25, 50, 0.5) 100%);
+        border-top: 1px solid rgba(0, 200, 255, 0.1);
+    }
+
+    .testimonials-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+        gap: 30px;
+        max-width: 1200px;
+        margin: 0 auto;
+    }
+
+    .testimonial-card {
+        background: linear-gradient(135deg, rgba(0, 200, 255, 0.08) 0%, rgba(100, 0, 255, 0.08) 100%);
+        border: 1px solid rgba(0, 200, 255, 0.15);
+        border-radius: 20px;
+        padding: 35px;
+        transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+        backdrop-filter: blur(10px);
+        animation: fadeInScale 0.6s ease-out forwards;
+        opacity: 0;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .testimonial-card:nth-child(1) { animation-delay: 0.4s; }
+    .testimonial-card:nth-child(2) { animation-delay: 0.5s; }
+    .testimonial-card:nth-child(3) { animation-delay: 0.6s; }
+
+    .testimonial-card::before {
+        content: '';
+        position: absolute;
+        top: -100%;
+        left: -100%;
+        width: 200%;
+        height: 200%;
+        background: radial-gradient(circle, rgba(0, 247, 255, 0.2) 0%, transparent 70%);
+        opacity: 0;
+        transition: all 0.6s ease;
+    }
+
+    .testimonial-card:hover {
+        transform: translateY(-12px) scale(1.02);
+        border-color: rgba(0, 247, 255, 0.4);
+        box-shadow: 0 25px 70px rgba(0, 200, 255, 0.2);
+    }
+
+    .testimonial-card:hover::before {
+        opacity: 1;
+        top: -20%;
+        left: -20%;
+    }
+
+    .stars {
+        font-size: 1.2rem;
+        margin-bottom: 15px;
+        letter-spacing: 2px;
+    }
+
+    .testimonial-text {
+        font-size: 1.05rem;
+        color: rgba(200, 220, 255, 0.85);
+        line-height: 1.8;
+        margin-bottom: 25px;
+        font-style: italic;
+    }
+
+    .testimonial-author {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        position: relative;
+        z-index: 2;
+    }
+
+    .author-avatar {
+        width: 50px;
+        height: 50px;
+        background: linear-gradient(135deg, #00f7ff, #0066ff);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        color: #000;
+        font-size: 0.9rem;
+    }
+
+    .author-name {
+        font-size: 1rem;
+        font-weight: 700;
+        color: #fff;
+    }
+
+    .author-role {
+        font-size: 0.9rem;
+        color: rgba(200, 220, 255, 0.6);
+    }
+
+    /* ===== PREMIUM CTA SECTION ===== */
+    .premium-cta {
+        padding: 120px 20px;
+        background: linear-gradient(135deg, rgba(0, 200, 255, 0.15) 0%, rgba(100, 0, 255, 0.15) 100%);
+        border-top: 1px solid rgba(0, 200, 255, 0.2);
+        border-bottom: 1px solid rgba(0, 200, 255, 0.2);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .premium-cta::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: radial-gradient(ellipse at 20% 50%, rgba(0, 247, 255, 0.1) 0%, transparent 50%),
+                    radial-gradient(ellipse at 80% 50%, rgba(100, 0, 255, 0.1) 0%, transparent 50%);
+        animation: gradientShift 8s ease infinite;
+        z-index: 0;
+    }
+
+    .cta-content {
+        position: relative;
+        z-index: 10;
+        text-align: center;
+        max-width: 700px;
+        margin: 0 auto;
+        animation: slideUpFade 1s ease-out forwards;
+    }
+
+    .cta-title {
+        font-size: clamp(2rem, 6vw, 3.5rem);
+        font-weight: 900;
+        margin-bottom: 20px;
+        background: linear-gradient(135deg, #00f7ff 0%, #00c8ff 25%, #64bfff 75%, #00ffff 100%);
+        background-size: 300% 300%;
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        animation: gradientShift 8s ease infinite;
+    }
+
+    .cta-subtitle {
+        font-size: 1.25rem;
+        color: rgba(200, 220, 255, 0.85);
+        margin-bottom: 40px;
+        line-height: 1.7;
+    }
+
+    .cta-buttons {
+        display: flex;
+        gap: 20px;
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+
+    .cta-btn {
+        font-size: 1.1rem;
+        padding: 18px 50px;
+    }
+
+    /* ===== FAQ SECTION ===== */
+    .faq {
+        padding: 100px 20px;
+        background: linear-gradient(180deg, rgba(15, 25, 50, 0.5) 0%, rgba(10, 11, 14, 0.5) 100%);
+        border-top: 1px solid rgba(0, 200, 255, 0.1);
+    }
+
+    .faq-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+        gap: 20px;
+        max-width: 1000px;
+        margin: 0 auto;
+    }
+
+    .faq-item {
+        background: linear-gradient(135deg, rgba(0, 200, 255, 0.06) 0%, rgba(100, 0, 255, 0.06) 100%);
+        border: 1px solid rgba(0, 200, 255, 0.12);
+        border-radius: 16px;
+        overflow: hidden;
+        animation: fadeInScale 0.6s ease-out forwards;
+        opacity: 0;
+        transition: all 0.3s ease;
+        backdrop-filter: blur(10px);
+    }
+
+    .faq-item:nth-child(1) { animation-delay: 0.3s; }
+    .faq-item:nth-child(2) { animation-delay: 0.4s; }
+    .faq-item:nth-child(3) { animation-delay: 0.5s; }
+    .faq-item:nth-child(4) { animation-delay: 0.6s; }
+    .faq-item:nth-child(5) { animation-delay: 0.7s; }
+    .faq-item:nth-child(6) { animation-delay: 0.8s; }
+
+    .faq-item:hover {
+        border-color: rgba(0, 200, 255, 0.3);
+        background: linear-gradient(135deg, rgba(0, 200, 255, 0.12) 0%, rgba(100, 0, 255, 0.12) 100%);
+        box-shadow: 0 8px 32px rgba(0, 200, 255, 0.1);
+    }
+
+    .faq-question {
+        padding: 25px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        cursor: pointer;
+        font-weight: 600;
+        color: #fff;
+        font-size: 1.1rem;
+        user-select: none;
+        transition: color 0.3s ease;
+    }
+
+    .faq-question:hover {
+        color: #00c8ff;
+    }
+
+    .faq-toggle {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 30px;
+        height: 30px;
+        background: linear-gradient(135deg, #00f7ff, #0066ff);
+        border-radius: 50%;
+        color: #000;
+        font-weight: bold;
+        transition: transform 0.3s ease;
+    }
+
+    .faq-item.active .faq-toggle {
+        transform: rotate(45deg);
+    }
+
+    .faq-answer {
+        padding: 0 25px 25px 25px;
+        max-height: 0;
+        overflow: hidden;
+        transition: all 0.3s ease;
+        color: rgba(200, 220, 255, 0.8);
+        line-height: 1.7;
+    }
+
+    .faq-item.active .faq-answer {
+        max-height: 300px;
+        padding: 20px 25px 25px 25px;
+    }
+
+    /* ===== FOOTER ===== */
+    footer {
+        padding: 50px 20px;
+        text-align: center;
+        border-top: 1px solid rgba(0, 200, 255, 0.15);
+        background: linear-gradient(180deg, rgba(10, 11, 14, 0) 0%, rgba(0, 50, 100, 0.2) 100%);
+        color: rgba(200, 220, 255, 0.6);
+        font-size: 0.95rem;
+        position: relative;
+        overflow: hidden;
+    }
+
+    footer::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(90deg, transparent, rgba(0, 200, 255, 0.05), transparent);
+        animation: shimmer 3s infinite;
+    }
+
+    footer p {
+        position: relative;
+        z-index: 2;
+        animation: slideUpFade 1.5s ease-out forwards;
+        opacity: 0;
+        animation-delay: 2s;
+    }
+
+    /* ===== ANIMATIONS ===== */
+    @keyframes slideUpFade {
+        0% {
+            opacity: 0;
+            transform: translateY(40px);
+        }
+        100% {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @keyframes fadeIn {
+        0% { opacity: 0; }
+        100% { opacity: 1; }
+    }
+
+    @keyframes fadeInScale {
+        0% {
+            opacity: 0;
+            transform: scale(0.85) translateY(30px);
+        }
+        100% {
+            opacity: 1;
+            transform: scale(1) translateY(0);
+        }
+    }
+
+    @keyframes gradientShift {
+        0% {
+            background-position: 0% 50%;
+        }
+        50% {
+            background-position: 100% 50%;
+        }
+        100% {
+            background-position: 0% 50%;
+        }
+    }
+
+    @keyframes pulse {
+        0%, 100% {
+            opacity: 1;
+        }
+        50% {
+            opacity: 0.7;
+        }
+    }
+
+    @keyframes float {
+        0%, 100% {
+            transform: translateY(0px);
+        }
+        50% {
+            transform: translateY(-20px);
+        }
+    }
+
+    @keyframes glow {
+        0%, 100% {
+            box-shadow: 0 0 20px rgba(0, 247, 255, 0.3);
+        }
+        50% {
+            box-shadow: 0 0 40px rgba(0, 247, 255, 0.6);
+        }
+    }
+
+    @keyframes shimmer {
+        0% {
+            background-position: -1000px 0;
+        }
+        100% {
+            background-position: 1000px 0;
+        }
+    }
+
+    @keyframes rotateGradient {
+        0% {
+            transform: rotate(0deg);
+        }
+        100% {
+            transform: rotate(360deg);
+        }
+    }
+
+    @keyframes slideInFromLeft {
+        0% {
+            opacity: 0;
+            transform: translateX(-50px);
+        }
+        100% {
+            opacity: 1;
+            transform: translateX(0);
+        }
+    }
+
+    @keyframes slideInFromRight {
+        0% {
+            opacity: 0;
+            transform: translateX(50px);
+        }
+        100% {
+            opacity: 1;
+            transform: translateX(0);
+        }
+    }
+
+    @keyframes bounce {
+        0%, 100% {
+            transform: translateY(0);
+        }
+        50% {
+            transform: translateY(-10px);
+        }
+    }
+
+    /* ===== RESPONSIVE ===== */
+    @media (max-width: 768px) {
+        .hero {
+            padding: 40px 20px;
+            min-height: auto;
+        }
+
+        h1 {
+            margin-bottom: 15px;
+        }
+
+        .cta-buttons {
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .features-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .testimonials-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .faq-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-10px) scale(1);
+        }
+
+        .testimonial-card:hover {
+            transform: translateY(-8px) scale(1);
+        }
+
+        .premium-cta {
+            padding: 80px 20px;
+        }
+
+        .cta-title {
+            font-size: 2rem;
+        }
+
+        .section-title {
+            font-size: 2rem;
+        }
+
+        .btn {
+            width: 100%;
+            max-width: 100%;
+        }
+
+        .specs-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
+
+    @media (max-width: 480px) {
+        .specs-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .logo-badge {
+            font-size: 0.8rem;
+        }
+
+        #particleCanvas {
+            display: none;
+        }
+    }
+</style>
+</head>
+<body>
+
+<div class="animated-bg">
+    <div class="gradient-overlay"></div>
+    <canvas id="matrixCanvas"></canvas>
+    <canvas id="particleCanvas"></canvas>
+</div>
+
+<div class="content-wrapper">
+    <!-- HERO SECTION -->
+    <section class="hero">
+        <div class="hero-content">
+            <div class="logo-badge">⚡ Complete Terminal Simplified</div>
+            <h1>PKtool</h1>
+            <p class="subtitle">Transform your command line into a powerful, intuitive tool. One-click quick scans and simplified commands for everyday users. No technical knowledge required.</p>
+            <div class="cta-buttons">
+                <a href="PKtool.exe" download="PKtool.exe" class="btn btn-primary">↓ Download Now</a>
+                <button class="btn btn-secondary" onclick="document.querySelector('.features').scrollIntoView({behavior: 'smooth'})">Learn More</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- FEATURES SECTION -->
+    <section class="features">
+        <div class="section-header">
+            <h2 class="section-title">Powerful Features</h2>
+            <p class="section-subtitle">Simple, powerful tools to make your workflow easier</p>
+        </div>
+        <div class="features-grid">
+            <div class="feature-card">
+                <div class="feature-icon">💻</div>
+                <h3 class="feature-title">Simplified Command Line</h3>
+                <p class="feature-desc">Replace confusing terminal commands with intuitive, easy-to-understand interface anyone can master</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">🛡️</div>
+                <h3 class="feature-title">Quick Scan Capability</h3>
+                <p class="feature-desc">One-click quick scans powered by Windows Defender. Simple, effective, built right in</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">👤</div>
+                <h3 class="feature-title">Average User Friendly</h3>
+                <p class="feature-desc">No technical knowledge required. Use daily with confidence, just like a regular application</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">⚡</div>
+                <h3 class="feature-title">Lightning Fast</h3>
+                <p class="feature-desc">Instant command execution with minimal system resource consumption</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">🎯</div>
+                <h3 class="feature-title">Smart Shortcuts</h3>
+                <p class="feature-desc">Create custom shortcuts for your most-used tasks. Automate your workflow with simplicity</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">💡</div>
+                <h3 class="feature-title">Easy to Learn</h3>
+                <p class="feature-desc">Intuitive design means you're productive from day one. No technical knowledge required</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- SPECS SECTION -->
+    <section class="specs">
+        <div class="section-header">
+            <h2 class="section-title">Why Choose PKtool</h2>
+            <p class="section-subtitle">Trusted by everyday users who want terminal power without the complexity</p>
+        </div>
+        <div class="specs-grid">
+            <div class="spec-item">
+                <div class="spec-number">1-Click</div>
+                <div class="spec-label">Quick Scans</div>
+            </div>
+            <div class="spec-item">
+                <div class="spec-number" data-target="100">0</div>
+                <div class="spec-label">% User-Friendly</div>
+            </div>
+            <div class="spec-item">
+                <div class="spec-number" data-target="10">0</div>
+                <div class="spec-label">ms Command Speed</div>
+            </div>
+            <div class="spec-item">
+                <div class="spec-number">Windows</div>
+                <div class="spec-label">Defender Powered</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- TESTIMONIALS SECTION -->
+    <section class="testimonials">
+        <div class="section-header">
+            <h2 class="section-title">Loved by Users</h2>
+            <p class="section-subtitle">See what real users are saying</p>
+        </div>
+        <div class="testimonials-grid">
+            <div class="testimonial-card">
+                <div class="stars">⭐⭐⭐⭐⭐</div>
+                <p class="testimonial-text">"PKtool changed how I work. No more terminal confusion. It's like having a smart assistant that understands what I need."</p>
+                <div class="testimonial-author">
+                    <div class="author-avatar">JM</div>
+                    <div>
+                        <div class="author-name">James Mitchell</div>
+                        <div class="author-role">Software Developer</div>
+                    </div>
+                </div>
+            </div>
+            <div class="testimonial-card">
+                <div class="stars">⭐⭐⭐⭐⭐</div>
+                <p class="testimonial-text">"The quick scan feature is super convenient. I love being able to check my system directly from PKtool without jumping between apps."</p>
+                <div class="testimonial-author">
+                    <div class="author-avatar">SA</div>
+                    <div>
+                        <div class="author-name">Sarah Anderson</div>
+                        <div class="author-role">Business Owner</div>
+                    </div>
+                </div>
+            </div>
+            <div class="testimonial-card">
+                <div class="stars">⭐⭐⭐⭐⭐</div>
+                <p class="testimonial-text">"My kids can use PKtool now! It's so intuitive. This is what technology should feel like—simple and powerful."</p>
+                <div class="testimonial-author">
+                    <div class="author-avatar">RK</div>
+                    <div>
+                        <div class="author-name">Robert Kim</div>
+                        <div class="author-role">IT Professional</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA SECTION -->
+    <section class="premium-cta">
+        <div class="cta-content">
+            <h2 class="cta-title">Ready to Transform Your Terminal?</h2>
+            <p class="cta-subtitle">Join users who've simplified their workflow with PKtool</p>
+            <div class="cta-buttons">
+                <a href="PKtool.exe" download="PKtool.exe" class="btn btn-primary cta-btn">⬇ Download PKtool Now</a>
+                <button class="btn btn-secondary cta-btn" onclick="toggleFAQ()">Still Have Questions?</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- FAQ SECTION -->
+    <section class="faq" id="faq-section">
+        <div class="section-header">
+            <h2 class="section-title">Frequently Asked Questions</h2>
+            <p class="section-subtitle">Everything you need to know</p>
+        </div>
+        <div class="faq-grid">
+            <div class="faq-item">
+                <div class="faq-question" onclick="toggleFAQItem(this)">
+                    <span>Is PKtool safe to use?</span>
+                    <span class="faq-toggle">+</span>
+                </div>
+                <div class="faq-answer">
+                    <p>Yes! PKtool is a simple interface tool designed to simplify command-line usage. It includes quick scan capability powered by Windows Defender so you can easily check your system whenever you want.</p>
+                </div>
+            </div>
+            <div class="faq-item">
+                <div class="faq-question" onclick="toggleFAQItem(this)">
+                    <span>Do I need technical knowledge?</span>
+                    <span class="faq-toggle">+</span>
+                </div>
+                <div class="faq-answer">
+                    <p>No! PKtool is designed specifically for everyday users. We transform confusing terminal commands into simple, easy-to-understand buttons and menus anyone can use.</p>
+                </div>
+            </div>
+            <div class="faq-item">
+                <div class="faq-question" onclick="toggleFAQItem(this)">
+                    <span>How fast is PKtool?</span>
+                    <span class="faq-toggle">+</span>
+                </div>
+                <div class="faq-answer">
+                    <p>Lightning fast! Commands execute in under 10ms. PKtool is optimized for instant performance without consuming system resources.</p>
+                </div>
+            </div>
+            <div class="faq-item">
+                <div class="faq-question" onclick="toggleFAQItem(this)">
+                    <span>What about Windows Defender scans?</span>
+                    <span class="faq-toggle">+</span>
+                </div>
+                <div class="faq-answer">
+                    <p>PKtool includes a convenient one-click quick scan feature that uses your built-in Windows Defender. It's perfect for quick system checks when you want them.</p>
+                </div>
+            </div>
+            <div class="faq-item">
+                <div class="faq-question" onclick="toggleFAQItem(this)">
+                    <span>Is there a cost?</span>
+                    <span class="faq-toggle">+</span>
+                </div>
+                <div class="faq-answer">
+                    <p>PKtool is completely free to download and use! All features including the quick scan capability are included at no cost.</p>
+                </div>
+            </div>
+            <div class="faq-item">
+                <div class="faq-question" onclick="toggleFAQItem(this)">
+                    <span>What systems does it work on?</span>
+                    <span class="faq-toggle">+</span>
+                </div>
+                <div class="faq-answer">
+                    <p>PKtool is optimized for Windows systems. It works smoothly on any modern Windows machine and requires Windows Defender to be available for the quick scan feature.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+
+<footer>
+    <p>© 2026 PKtool Dev. All rights reserved. | Built with precision for professionals.</p>
+</footer>
+
+<script>
+    // ===== ENHANCED MATRIX BACKGROUND =====
+    const matrixCanvas = document.getElementById("matrixCanvas");
+    const mCtx = matrixCanvas.getContext("2d");
+    matrixCanvas.width = window.innerWidth;
+    matrixCanvas.height = window.innerHeight;
+
+    const letters = "PKTOOL01ѿ나ふ";
+    const fontSize = 16;
+    const columns = Math.floor(matrixCanvas.width / fontSize);
+    const drops = Array(columns).fill(0);
+
+    function drawMatrix() {
+        mCtx.fillStyle = "rgba(10, 11, 14, 0.05)";
+        mCtx.fillRect(0, 0, matrixCanvas.width, matrixCanvas.height);
+        mCtx.fillStyle = "rgba(0, 200, 255, 0.15)";
+        mCtx.font = `${fontSize}px 'Fira Code', monospace`;
+
+        for(let i = 0; i < drops.length; i++) {
+            const text = letters.charAt(Math.floor(Math.random() * letters.length));
+            mCtx.fillText(text, i * fontSize, drops[i] * fontSize);
+            if(drops[i] * fontSize > matrixCanvas.height && Math.random() > 0.975) {
+                drops[i] = 0;
+            }
+            drops[i] += 0.8;
+        }
+        requestAnimationFrame(drawMatrix);
+    }
+    drawMatrix();
+
+    // ===== ENHANCED PARTICLE SYSTEM =====
+    const particleCanvas = document.getElementById("particleCanvas");
+    const pCtx = particleCanvas.getContext("2d");
+    particleCanvas.width = window.innerWidth;
+    particleCanvas.height = window.innerHeight;
+
+    const particles = [];
+    const particleCount = 120;
+    let mouseX = 0;
+    let mouseY = 0;
+
+    class Particle {
+        constructor() {
+            this.x = Math.random() * particleCanvas.width;
+            this.y = Math.random() * particleCanvas.height;
+            this.size = Math.random() * 2.5 + 0.5;
+            this.speedX = (Math.random() - 0.5) * 0.8;
+            this.speedY = (Math.random() - 0.5) * 0.8;
+            this.opacity = Math.random() * 0.5 + 0.3;
+            this.targetOpacity = this.opacity;
+            this.color = Math.random() > 0.5 ? '#00c8ff' : '#0066ff';
+        }
+
+        update() {
+            this.x += this.speedX;
+            this.y += this.speedY;
+
+            // Wrap around edges
+            if(this.x < 0) this.x = particleCanvas.width;
+            if(this.x > particleCanvas.width) this.x = 0;
+            if(this.y < 0) this.y = particleCanvas.height;
+            if(this.y > particleCanvas.height) this.y = 0;
+
+            // Distance-based opacity for mouse interaction
+            const dx = this.x - mouseX;
+            const dy = this.y - mouseY;
+            const distance = Math.sqrt(dx * dx + dy * dy);
+            
+            if(distance < 150) {
+                this.targetOpacity = Math.min(0.8, this.opacity + 0.3);
+            } else {
+                this.targetOpacity = this.opacity;
+            }
+            
+            // Smooth opacity transition
+            if(Math.abs(this.targetOpacity - this.opacity) > 0.01) {
+                this.opacity += (this.targetOpacity - this.opacity) * 0.1;
+            }
+        }
+
+        draw() {
+            pCtx.fillStyle = `rgba(0, 200, 255, ${this.opacity})`;
+            pCtx.shadowColor = `rgba(0, 200, 255, ${this.opacity * 0.5})`;
+            pCtx.shadowBlur = 10;
+            pCtx.beginPath();
+            pCtx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+            pCtx.fill();
+        }
+    }
+
+    for(let i = 0; i < particleCount; i++) {
+        particles.push(new Particle());
+    }
+
+    function animateParticles() {
+        pCtx.shadowColor = 'transparent';
+        pCtx.clearRect(0, 0, particleCanvas.width, particleCanvas.height);
+        
+        particles.forEach(p => {
+            p.update();
+            p.draw();
+        });
+
+        // Draw connecting lines between nearby particles
+        for(let i = 0; i < particles.length; i++) {
+            for(let j = i + 1; j < particles.length; j++) {
+                const dx = particles[i].x - particles[j].x;
+                const dy = particles[i].y - particles[j].y;
+                const distance = Math.sqrt(dx * dx + dy * dy);
+                
+                if(distance < 120) {
+                    pCtx.strokeStyle = `rgba(0, 200, 255, ${0.1 * (1 - distance / 120)})`;
+                    pCtx.lineWidth = 0.5;
+                    pCtx.beginPath();
+                    pCtx.moveTo(particles[i].x, particles[i].y);
+                    pCtx.lineTo(particles[j].x, particles[j].y);
+                    pCtx.stroke();
+                }
+            }
+        }
+        
+        requestAnimationFrame(animateParticles);
+    }
+    animateParticles();
+
+    // Track mouse movement for particle interaction
+    document.addEventListener('mousemove', (e) => {
+        mouseX = e.clientX;
+        mouseY = e.clientY;
+    });
+
+    // ===== WINDOW RESIZE HANDLING =====
+    window.addEventListener("resize", () => {
+        matrixCanvas.width = window.innerWidth;
+        matrixCanvas.height = window.innerHeight;
+        particleCanvas.width = window.innerWidth;
+        particleCanvas.height = window.innerHeight;
+    });
+
+    // ===== ANIMATED COUNTERS FOR SPECS =====
+    function animateCounter(element) {
+        const target = parseInt(element.getAttribute('data-target'));
+        if(!target) return;
+        
+        let current = 0;
+        const increment = Math.ceil(target / 60);
+        const interval = setInterval(() => {
+            current += increment;
+            if(current >= target) {
+                current = target;
+                clearInterval(interval);
+            }
+            element.textContent = current;
+        }, 30);
+    }
+
+    // Observe spec items for counter animation
+    const counterObserver = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if(entry.isIntersecting) {
+                const number = entry.target.querySelector('[data-target]');
+                if(number) animateCounter(number);
+                counterObserver.unobserve(entry.target);
+            }
+        });
+    }, { threshold: 0.5 });
+
+    document.querySelectorAll('.spec-item').forEach(item => {
+        counterObserver.observe(item);
+    });
+
+    // ===== FAQ TOGGLE FUNCTIONALITY =====
+    function toggleFAQItem(element) {
+        const faqItem = element.closest('.faq-item');
+        const isOpen = faqItem.classList.contains('active');
+        
+        // Close all others
+        document.querySelectorAll('.faq-item.active').forEach(item => {
+            if(item !== faqItem) {
+                item.classList.remove('active');
+            }
+        });
+        
+        // Toggle current
+        faqItem.classList.toggle('active');
+    }
+
+    function toggleFAQ() {
+        document.getElementById('faq-section').scrollIntoView({ behavior: 'smooth' });
+    }
+
+    // ===== ENHANCED MOUSE TRACKING =====
+    const cursor = document.createElement('div');
+    cursor.style.cssText = `
+        position: fixed;
+        width: 20px;
+        height: 20px;
+        border: 2px solid rgba(0, 200, 255, 0.5);
+        border-radius: 50%;
+        pointer-events: none;
+        z-index: 9999;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    `;
+    document.body.appendChild(cursor);
+
+    let cursorActive = false;
+    document.addEventListener('mousemove', (e) => {
+        mouseX = e.clientX;
+        mouseY = e.clientY;
+        
+        cursor.style.left = (e.clientX - 10) + 'px';
+        cursor.style.top = (e.clientY - 10) + 'px';
+        
+        if(!cursorActive) {
+            cursor.style.opacity = '1';
+            cursorActive = true;
+        }
+    });
+
+    document.addEventListener('mouseleave', () => {
+        cursor.style.opacity = '0';
+        cursorActive = false;
+    });
+
+    // ===== ENHANCED SCROLL PARALLAX =====
+    const hero = document.querySelector('.hero');
+    let rafId;
+    window.addEventListener('scroll', () => {
+        if(rafId) cancelAnimationFrame(rafId);
+        rafId = requestAnimationFrame(() => {
+            const scrolled = window.pageYOffset;
+            if(hero) {
+                hero.style.transform = `translateY(${scrolled * 0.4}px) scale(${1 - scrolled * 0.0005})`;
+            }
+        });
+    });
+
+    // ===== TEXT REVEAL ANIMATION =====
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if(entry.isIntersecting) {
+                if(entry.target.classList.contains('feature-card')) {
+                    entry.target.style.animation = 'fadeInScale 0.6s ease-out forwards';
+                } else if(entry.target.classList.contains('spec-item')) {
+                    entry.target.style.animation = 'fadeInScale 0.6s ease-out forwards';
+                } else if(entry.target.classList.contains('testimonial-card')) {
+                    entry.target.style.animation = 'fadeInScale 0.6s ease-out forwards';
+                } else if(entry.target.classList.contains('faq-item')) {
+                    entry.target.style.animation = 'fadeInScale 0.6s ease-out forwards';
+                }
+                entry.target.style.opacity = '1';
+                observer.unobserve(entry.target);
+            }
+        });
+    }, { threshold: 0.1, rootMargin: '0px 0px -100px 0px' });
+
+    // Observe animated elements
+    document.querySelectorAll('.feature-card, .spec-item, .testimonial-card, .faq-item, .section-header').forEach(el => {
+        observer.observe(el);
+    });
+
+    // ===== SMOOTH BUTTON INTERACTIONS =====
+    document.querySelectorAll('.btn').forEach(btn => {
+        btn.addEventListener('mouseenter', function() {
+            this.style.transform = 'translateY(-4px) scale(1.02)';
+        });
+        btn.addEventListener('mouseleave', function() {
+            this.style.transform = 'translateY(0) scale(1)';
+        });
+        btn.addEventListener('mousedown', function() {
+            this.style.transform = 'translateY(-2px) scale(0.98)';
+        });
+        btn.addEventListener('mouseup', function() {
+            this.style.transform = 'translateY(-4px) scale(1.02)';
+        });
+    });
+
+    // ===== PARTICLE INTERACTION WITH MOUSE =====
+    let lastMousePos = { x: 0, y: 0 };
+    document.addEventListener('mousemove', (e) => {
+        lastMousePos.x = e.clientX;
+        lastMousePos.y = e.clientY;
+    });
+
+    // Enhanced particle repulsion
+    class EnhancedParticle {
+        constructor() {
+            this.x = Math.random() * particleCanvas.width;
+            this.y = Math.random() * particleCanvas.height;
+            this.size = Math.random() * 2.5 + 0.5;
+            this.speedX = (Math.random() - 0.5) * 0.8;
+            this.speedY = (Math.random() - 0.5) * 0.8;
+            this.opacity = Math.random() * 0.5 + 0.3;
+            this.targetOpacity = this.opacity;
+            this.color = Math.random() > 0.5 ? '#00c8ff' : '#0066ff';
+        }
+
+        update() {
+            this.x += this.speedX;
+            this.y += this.speedY;
+
+            if(this.x < 0) this.x = particleCanvas.width;
+            if(this.x > particleCanvas.width) this.x = 0;
+            if(this.y < 0) this.y = particleCanvas.height;
+            if(this.y > particleCanvas.height) this.y = 0;
+
+            const dx = this.x - lastMousePos.x;
+            const dy = this.y - lastMousePos.y;
+            const distance = Math.sqrt(dx * dx + dy * dy);
+            
+            if(distance < 200) {
+                const angle = Math.atan2(dy, dx);
+                this.speedX += Math.cos(angle) * 0.05;
+                this.speedY += Math.sin(angle) * 0.05;
+                this.targetOpacity = Math.min(0.9, this.opacity + 0.4);
+            } else {
+                this.targetOpacity = this.opacity;
+            }
+            
+            if(Math.abs(this.targetOpacity - this.opacity) > 0.01) {
+                this.opacity += (this.targetOpacity - this.opacity) * 0.1;
+            }
+        }
+
+        draw() {
+            pCtx.fillStyle = `rgba(0, 200, 255, ${this.opacity})`;
+            pCtx.shadowColor = `rgba(0, 200, 255, ${this.opacity * 0.5})`;
+            pCtx.shadowBlur = 15;
+            pCtx.beginPath();
+            pCtx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+            pCtx.fill();
+        }
+    }
+
+    // More advanced particle effects on scroll
+    window.addEventListener('scroll', () => {
+        const scrollPercent = window.scrollY / (document.documentElement.scrollHeight - window.innerHeight);
+        const particleCount = Math.floor(80 + scrollPercent * 80);
+        while(particles.length < particleCount && particles.length < 160) {
+            particles.push(new Particle());
+        }
+    });
+
+    // ===== CLICK PARTICLE BURST =====
+    document.addEventListener('click', (e) => {
+        if(e.target.classList.contains('btn')) {
+            for(let i = 0; i < 10; i++) {
+                const particle = new Particle();
+                particle.x = e.clientX;
+                particle.y = e.clientY;
+                particle.speedX = (Math.random() - 0.5) * 4;
+                particle.speedY = (Math.random() - 0.5) * 4 - 1;
+                particles.push(particle);
+            }
+        }
+    });
+
+</script>
+
+</body>
+</html>
